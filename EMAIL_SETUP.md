@@ -87,6 +87,17 @@ EMAIL_USE_TLS=1
 3. **Créez un utilisateur** via l'interface admin
 4. **Vérifiez** que l'email de bienvenue est reçu
 
+## ⚙️ Comportement en cas d'erreur
+
+- Par défaut, l'application **n'ignore pas** les erreurs SMTP (elles s'affichent), afin de garantir la délivrabilité.
+- Vous pouvez rendre les erreurs silencieuses (non recommandé) en ajoutant dans `.env` :
+
+```bash
+EMAIL_FAIL_SILENTLY=1
+```
+
+Sans cette variable (ou avec `EMAIL_FAIL_SILENTLY=0`), toute erreur d'envoi provoquera une exception visible.
+
 ## ✅ Vérification
 
 Après configuration, quand un admin crée un utilisateur :
