@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block title %}Gestion des Clients{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+  <h2>👥 Gestion des Clients</h2>
+  <a href="/customers/create/" class="btn btn-primary">➕ Nouveau Client</a>
+</div>
+
+<!-- Statistiques -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">👥</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ customers.count }}</div>
+      <div class="stat-label">Total Clients</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🏦</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ unique_banks_count }}</div>
+      <div class="stat-label">Banques Représentées</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">💳</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_accounts_count }}</div>
+      <div class="stat-label">Comptes Total</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">💰</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_balance|floatformat:2 }} €</div>
+      <div class="stat-label">Solde Total</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filtres -->
+<div class="filters-card">
+  <h3>🔍 Filtres</h3>
+  <form method="get" class="filters-form">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="bank">🏦 Banque</label>
+        <select name="bank" id="bank" class="form-select">
+          <option value="">Toutes les banques</option>
+          {% for bank in banks %}
+            <option value="{{ bank.id }}" {% if request.GET.bank == bank.id|stringformat:"s" %}selected{% endif %}>
+              {{ bank.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="name">👤 Nom</label>
+        <input type="text" name="name" id="name" class="form-control" 
+               value="{{ request.GET.name }}" placeholder="Rechercher par nom...">
+      </div>
+      
+      <div class="filter-group">
+        <label for="email">📧 Email</label>
+        <input type="email" name="email" id="email" class="form-control" 
+               value="{{ request.GET.email }}" placeholder="Rechercher par email...">
+      </div>
+      
+      <div class="filter-group">
+        <label for="client_no">🆔 Numéro Client</label>
+        <input type="text" name="client_no" id="client_no" class="form-control" 
+               value="{{ request.GET.client_no }}" placeholder="Rechercher par numéro...">
+      </div>
+      
+      <div class="filter-group">
+        <label for="account_count">💳 Nombre de Comptes</label>
+        <select name="account_count" id="account_count" class="form-select">
+          <option value="">Tous</option>
+          <option value="0" {% if request.GET.account_count == '0' %}selected{% endif %}>Aucun compte</option>
+          <option value="1" {% if request.GET.account_count == '1' %}selected{% endif %}>1 compte</option>
+          <option value="2-5" {% if request.GET.account_count == '2-5' %}selected{% endif %}>2-5 comptes</option>
+          <option value="6-10" {% if request.GET.account_count == '6-10' %}selected{% endif %}>6-10 comptes</option>
+          <option value="10+" {% if request.GET.account_count == '10+' %}selected{% endif %}>Plus de 10 comptes</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="filters-actions">
+      <button type="submit" class="btn btn-primary">🔍 Filtrer</button>
+      <a href="/customers/" class="btn btn-secondary">🔄 Réinitialiser</a>
+    </div>
+  </form>
+</div>
+
+<!-- Liste des clients -->
+<div class="customers-section">
+  <div class="section-header">
+    <h3>📋 Liste des Clients ({{ customers.count }})</h3>
+    {% if request.GET %}
+      <span class="active-filters">
+        Filtres actifs: 
+        {% for key, value in request.GET.items %}
+          {% if value and key != 'page' %}
+            <span class="filter-tag">{{ key }}: {{ value }}</span>
+          {% endif %}
+        {% endfor %}
+      </span>
+    {% endif %}
+  </div>
+
+  <div class="customers-grid">
+    {% for customer in customers %}
+      <div class="customer-card">
+        <div class="customer-header">
+          <div class="customer-name">{{ customer.name }}</div>
+          <div class="customer-number">{{ customer.client_no }}</div>
+        </div>
+        
+        <div class="customer-info">
+          <div class="info-row">
+            <span class="info-label">📧 Email:</span>
+            <span class="info-value">{{ customer.email }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">📞 Téléphone:</span>
+            <span class="info-value">{{ customer.phone }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">🏦 Banque:</span>
+            <span class="info-value">{{ customer.bank.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">🌍 Pays:</span>
+            <span class="info-value">{{ customer.bank.country }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">🏙️ Ville:</span>
+            <span class="info-value">{{ customer.bank.city }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">💳 Comptes:</span>
+            <span class="info-value">
+              <span class="account-count-badge">{{ customer.accounts.count }}</span>
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">💰 Solde Total:</span>
+            <span class="info-value balance">
+              {% with total_balance=customer.accounts.all|sum_balance %}
+                {{ total_balance|floatformat:2 }} €
+              {% endwith %}
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">📅 Créé le:</span>
+            <span class="info-value">{{ customer.created_at|date:"d/m/Y" }}</span>
+          </div>
+        </div>
+        
+        <div class="customer-actions">
+          <a href="/customers/{{ customer.pk }}/" class="btn btn-sm btn-info">👁️ Détails</a>
+          <a href="/customers/{{ customer.pk }}/update/" class="btn btn-sm btn-warning">✏️ Modifier</a>
+          <a href="/customers/{{ customer.pk }}/delete/" class="btn btn-sm btn-danger" 
+             onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce client ?')">🗑️ Supprimer</a>
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>Aucun client trouvé</h3>
+        <p>{% if request.GET %}Aucun client ne correspond à vos critères de recherche.{% else %}Aucun client n'a encore été créé.{% endif %}</p>
+        <a href="/customers/create/" class="btn btn-primary">➕ Créer le premier client</a>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if customers.has_other_pages %}
+  <div class="pagination">
+    {% if customers.has_previous %}
+      <a href="?page={{ customers.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-sm">← Précédent</a>
+    {% endif %}
+    
+    <span class="page-info">
+      Page {{ customers.number }} sur {{ customers.paginator.num_pages }}
+    </span>
+    
+    {% if customers.has_next %}
+      <a href="?page={{ customers.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-sm">Suivant →</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

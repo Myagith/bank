@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+{% block title %}Supprimer le Client - {{ customer.name }}{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+  <div class="delete-card">
+    <div class="delete-header">
+      <div class="delete-icon">⚠️</div>
+      <h2>Supprimer le Client</h2>
+    </div>
+    
+    <div class="delete-content">
+      <p class="delete-message">
+        Êtes-vous sûr de vouloir supprimer le client <strong>{{ customer.name }}</strong> ?
+      </p>
+      
+      <div class="customer-info">
+        <div class="info-item">
+          <span class="info-label">Numéro client:</span>
+          <span class="info-value">{{ customer.client_no }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Email:</span>
+          <span class="info-value">{{ customer.email }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Banque:</span>
+          <span class="info-value">{{ customer.bank.name }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Comptes:</span>
+          <span class="info-value">{{ customer.accounts.count }} compte(s)</span>
+        </div>
+      </div>
+      
+      {% if customer.accounts.count > 0 %}
+        <div class="warning-box">
+          <h4>⚠️ Attention !</h4>
+          <p>Ce client possède {{ customer.accounts.count }} compte(s). La suppression du client supprimera également tous ses comptes et leurs transactions associées.</p>
+        </div>
+      {% endif %}
+      
+      <div class="delete-actions">
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">🗑️ Confirmer la suppression</button>
+          <a href="/customers/{{ customer.pk }}/" class="btn btn-secondary">❌ Annuler</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.delete-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.delete-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.delete-header {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.delete-icon {
+  font-size: 60px;
+  margin-bottom: 15px;
+}
+
+.delete-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.delete-content {
+  padding: 30px;
+}
+
+.delete-message {
+  font-size: 18px;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.customer-info {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.info-value {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.warning-box {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.warning-box h4 {
+  color: #856404;
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.warning-box p {
+  color: #856404;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.delete-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-danger {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+  .delete-actions {
+    flex-direction: column;
+  }
+  
+  .info-item {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
+}
+</style>
+{% endblock %}
