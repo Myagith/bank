@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}Gestion des Utilisateurs{% endblock %}
+{% block content %}
+<div class="header">
+  <h1>Gestion des Utilisateurs</h1>
+  <a href="/users/register/" class="btn btn-primary">➕ Créer un utilisateur</a>
+</div>
+
+<div class="cards">
+  <div class="card">
+    <div class="metric-label">Total Utilisateurs</div>
+    <div class="metric-value">{{ total_users }}</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Administrateurs</div>
+    <div class="metric-value">{{ admin_users }}</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Clients</div>
+    <div class="metric-value">{{ client_users }}</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Actifs</div>
+    <div class="metric-value">{{ active_users }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Liste des Utilisateurs</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Nom d'utilisateur</th>
+        <th>Email</th>
+        <th>Rôle</th>
+        <th>Statut</th>
+        <th>Date d'inscription</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>
+          <strong>{{ user.username }}</strong>
+          {% if user.is_superuser %}
+            <span class="badge badge-admin">Super Admin</span>
+          {% endif %}
+        </td>
+        <td>{{ user.email|default:"-" }}</td>
+        <td>
+          <span class="badge badge-{{ user.role|lower }}">
+            {{ user.get_role_display }}
+          </span>
+        </td>
+        <td>
+          {% if user.can_login %}
+            <span class="badge badge-success">Actif</span>
+          {% else %}
+            <span class="badge badge-warning">Inactif</span>
+          {% endif %}
+        </td>
+        <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
+        <td>
+          <div class="actions">
+            <a href="/admin/users/user/{{ user.id }}/change/" class="btn btn-small" title="Modifier">
+              ✏️
+            </a>
+            {% if user != request.user %}
+              <button class="btn btn-small btn-danger" onclick="toggleUserStatus({{ user.id }}, '{{ user.username }}')" title="Activer/Désactiver">
+                {% if user.can_login %}🚫{% else %}✅{% endif %}
+              </button>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">Aucun utilisateur trouvé</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+function toggleUserStatus(userId, username) {
+  if (confirm(`Voulez-vous changer le statut de l'utilisateur "${username}" ?`)) {
+    // Ici on pourrait ajouter une API pour changer le statut
+    // Pour l'instant, on redirige vers l'admin Django
+    window.open(`/admin/users/user/${userId}/change/`, '_blank');
+  }
+}
+</script>
+
+<style>
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-admin {
+  background: #ff6b35;
+  color: white;
+}
+
+.badge-administrator {
+  background: #ff8800;
+  color: white;
+}
+
+.badge-client {
+  background: #4caf50;
+  color: white;
+}
+
+.badge-success {
+  background: #4caf50;
+  color: white;
+}
+
+.badge-warning {
+  background: #ff9800;
+  color: white;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 0.9em;
+}
+
+.btn-danger {
+  background: #f44336;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+}
+</style>
+{% endblock %}

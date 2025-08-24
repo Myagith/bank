@@ -15,6 +15,7 @@
       <a href="/" class="nav-item">Tableau de bord</a>
       {% if request.user.is_authenticated and request.user.role == 'ADMIN' %}
         <span class="nav-section">Administration</span>
+        <a href="/dashboard/users/" class="nav-item">👥 Utilisateurs</a>
         <a href="/banks/" class="nav-item">Banques</a>
         <a href="/customers/" class="nav-item">Clients</a>
         <a href="/accounts/" class="nav-item">Comptes</a>

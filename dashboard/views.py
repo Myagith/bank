@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.db import models
 from users.models import User
 from banks.models import Bank
 from customers.models import Customer
@@ -48,3 +49,20 @@ def dashboard_client(request):
     return render(request, 'dashboard/client.html', {
         'total_balance': 0,
     })
+
+
+@login_required
+def manage_users(request):
+    """Vue pour la gestion des utilisateurs par l'admin"""
+    if request.user.role != User.Role.ADMIN:
+        return redirect('dashboard:index')
+    
+    users = User.objects.all().order_by('-date_joined')
+    context = {
+        'users': users,
+        'total_users': users.count(),
+        'admin_users': users.filter(role=User.Role.ADMIN).count(),
+        'client_users': users.filter(role=User.Role.CLIENT).count(),
+        'active_users': users.filter(can_login=True).count(),
+    }
+    return render(request, 'dashboard/manage_users.html', context)

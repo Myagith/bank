@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('admin/', views.dashboard_admin, name='admin'),
     path('client/', views.dashboard_client, name='client'),
+    path('users/', views.manage_users, name='manage_users'),
     path('api/transactions/monthly/', api.transactions_monthly, name='transactions_monthly'),
     path('api/transactions/monthly-by-type/', api.transactions_monthly_by_type, name='transactions_monthly_by_type'),
     path('api/banks/top15/', api.banks_top15, name='banks_top15'),
