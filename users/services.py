@@ -31,13 +31,19 @@ def send_otp_email(user: User) -> None:
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=settings.EMAIL_FAIL_SILENTLY)
 
 
-def send_welcome_email(user: User, raw_password: str) -> None:
+def send_welcome_email(user: User, raw_password: str | None = None) -> None:
     app_name = os.getenv('BANK_NAME', 'BANK')
     subject = os.getenv('WELCOME_EMAIL_SUBJECT', f"Bienvenue sur {app_name}")
-    template = os.getenv(
-        'WELCOME_EMAIL_BODY',
-        "Bonjour {username},\n\nVotre compte a été créé.\nIdentifiant: {username}\nMot de passe initial: {password}\n\nMerci d'utiliser {app_name}.")
-    message = template.format(username=user.username, password=raw_password, app_name=app_name)
+    if raw_password:
+        template = os.getenv(
+            'WELCOME_EMAIL_BODY',
+            "Bonjour {username},\n\nVotre compte a été créé.\nIdentifiant: {username}\nMot de passe initial: {password}\n\nMerci d'utiliser {app_name}.")
+        message = template.format(username=user.username, password=raw_password, app_name=app_name)
+    else:
+        template = os.getenv(
+            'WELCOME_EMAIL_BODY_NO_PASSWORD',
+            "Bonjour {username},\n\nVotre compte a été créé.\nIdentifiant: {username}\n\nMerci d'utiliser {app_name}.")
+        message = template.format(username=user.username, app_name=app_name)
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=settings.EMAIL_FAIL_SILENTLY)
 
 

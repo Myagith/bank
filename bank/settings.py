@@ -159,6 +159,10 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@bank.local')
 # Default '0' so errors are raised and visible
 EMAIL_FAIL_SILENTLY = os.getenv('EMAIL_FAIL_SILENTLY', '0') == '1'
 
+# Admin email auto-send toggles (off by default)
+EMAIL_SEND_WELCOME_ON_ADMIN_CREATE = os.getenv('EMAIL_SEND_WELCOME_ON_ADMIN_CREATE', '0') == '1'
+EMAIL_SEND_WELCOME_ON_ADMIN_CREATE_CUSTOMER = os.getenv('EMAIL_SEND_WELCOME_ON_ADMIN_CREATE_CUSTOMER', '0') == '1'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
