@@ -6,6 +6,7 @@ from banks.models import Bank
 from customers.models import Customer
 from accounts.models import Account
 from transactions.models import Transaction
+from users.services import get_user_accounts
 
 # Create your views here.
 
@@ -51,8 +52,8 @@ def dashboard_client(request):
     from django.utils import timezone
     from datetime import timedelta
     
-    # Récupérer les comptes du client
-    user_accounts = Account.objects.filter(customer__user=request.user)
+    # Récupérer les comptes du client via service helper
+    user_accounts = get_user_accounts(request.user)
     
     # Calculer le solde total
     total_balance = sum(account.balance or 0 for account in user_accounts)

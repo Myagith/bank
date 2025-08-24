@@ -8,6 +8,7 @@ from django.shortcuts import redirect
 from .models import Transaction
 from .forms import TransactionForm
 from .services import post_transaction
+from users.services import get_user_accounts
 
 
 class TransactionCreateView(LoginRequiredMixin, CreateView):
@@ -59,4 +60,5 @@ class ClientTransactionHistoryView(LoginRequiredMixin, FilterView):
     
     def get_queryset(self):
         # Filtrer uniquement les transactions du client connecté
-        return Transaction.objects.filter(account__customer__user=self.request.user)
+        user_accounts = get_user_accounts(self.request.user)
+        return Transaction.objects.filter(account__in=user_accounts)

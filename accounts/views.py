@@ -9,6 +9,7 @@ from django.db.models import Sum, Count, Q
 from .models import Account
 from .forms import AccountForm
 from banks.models import Bank
+from users.services import get_user_accounts
 
 
 class AccountListView(FilterView):
@@ -94,7 +95,7 @@ class ClientAccountListView(LoginRequiredMixin, FilterView):
     
     def get_queryset(self):
         # Filtrer uniquement les comptes du client connecté
-        return Account.objects.filter(customer__user=self.request.user)
+        return get_user_accounts(self.request.user)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

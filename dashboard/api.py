@@ -7,6 +7,7 @@ from banks.models import Bank
 from customers.models import Customer
 from django.utils.timezone import now
 from datetime import timedelta
+from users.services import get_user_accounts
 
 
 def transactions_monthly(request):
@@ -97,7 +98,7 @@ def client_balance_evolution(request):
     from django.db.models.functions import TruncDate
     
     # Récupérer les comptes du client
-    user_accounts = request.user.customer.accounts.all()
+    user_accounts = get_user_accounts(request.user)
     
     # Calculer l'évolution du solde par jour
     balance_data = (
@@ -140,7 +141,7 @@ def client_transactions_by_type(request):
     """Répartition des transactions par type pour le client"""
     from django.db.models import Sum
     
-    user_accounts = request.user.customer.accounts.all()
+    user_accounts = get_user_accounts(request.user)
     
     data = (
         Transaction.objects
@@ -170,7 +171,7 @@ def client_transactions_by_type(request):
 
 def client_recent_transactions(request):
     """Dernières transactions du client"""
-    user_accounts = request.user.customer.accounts.all()
+    user_accounts = get_user_accounts(request.user)
     
     transactions = (
         Transaction.objects
@@ -196,7 +197,7 @@ def client_recent_transactions(request):
 
 def client_savings_progress(request):
     """Progression vers l'objectif d'épargne (démo)"""
-    user_accounts = request.user.customer.accounts.all()
+    user_accounts = get_user_accounts(request.user)
     total_balance = sum(account.balance or 0 for account in user_accounts)
     
     # Objectif d'épargne fictif (10 000€)

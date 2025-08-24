@@ -4,6 +4,7 @@ from datetime import timedelta
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db.models import Q
 from .models import User
 
 
@@ -38,3 +39,32 @@ def send_welcome_email(user: User, raw_password: str) -> None:
         "Bonjour {username},\n\nVotre compte a été créé.\nIdentifiant: {username}\nMot de passe initial: {password}\n\nMerci d'utiliser {app_name}.")
     message = template.format(username=user.username, password=raw_password, app_name=app_name)
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
+
+
+def get_user_accounts(user: User):
+    """
+    Retourne les comptes appartenant logiquement à l'utilisateur connecté.
+    Mapping heuristique (pas de FK directe User->Customer dans le schéma) :
+      1) email exact entre User et Customer
+      2) sinon, username correspond au nom du client (name) ou au client_no
+    """
+    from customers.models import Customer
+    from accounts.models import Account
+
+    if not getattr(user, 'is_authenticated', False):
+        return Account.objects.none()
+
+    candidates = Customer.objects.none()
+
+    if user.email:
+        candidates = Customer.objects.filter(email__iexact=user.email)
+
+    if not candidates.exists():
+        candidates = Customer.objects.filter(
+            Q(name__iexact=user.username) | Q(client_no__iexact=user.username)
+        )
+
+    if not candidates.exists():
+        return Account.objects.none()
+
+    return Account.objects.filter(customer__in=candidates)
