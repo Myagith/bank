@@ -20,6 +20,7 @@ class CustomerAdmin(admin.ModelAdmin):
                 class DummyUser:
                     username = obj.name
                     email = obj.email
+                    phone = obj.phone
                 send_welcome_email(DummyUser())
             except Exception:
                 if not getattr(settings, 'EMAIL_FAIL_SILENTLY', True):
