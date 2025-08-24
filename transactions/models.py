@@ -15,6 +15,7 @@ class Transaction(models.Model):
     reference = models.CharField(max_length=64)
     description = models.CharField(max_length=255, blank=True, help_text="Description optionnelle de la transaction")
     created_at = models.DateTimeField(auto_now_add=True)
+    processed = models.BooleanField(default=False, help_text="Traitée dans le solde (pour éviter double traitement via signaux)")
 
     class Meta:
         ordering = ['-created_at']

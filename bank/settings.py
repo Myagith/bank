@@ -49,7 +49,7 @@ INSTALLED_APPS = [
     'banks',
     'customers',
     'accounts',
-    'transactions',
+    'transactions.apps.TransactionsConfig',
     'dashboard',
     'billing',
 ]
