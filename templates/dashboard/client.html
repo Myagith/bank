@@ -3,17 +3,64 @@
 {% block content %}
 <h1>Mon espace</h1>
 <p>Aperçu de vos comptes et opérations.</p>
+
 <div class="cards">
-  <div class="card"><div class="metric-label">Solde global</div><div class="metric-value">{{ total_balance|default:"0.00" }}</div></div>
-  <div class="card"><a class="btn" href="/accounts/">Mes comptes</a></div>
-  <div class="card"><a class="btn" href="/transactions/create/">Nouveau dépôt/virement</a></div>
-</div>
-<div class="grid2">
-  <div>
-    <h3>Mes montants mensuels</h3>
-    <canvas id="clientBar"></canvas>
+  <div class="card">
+    <div class="metric-label">Solde global</div>
+    <div class="metric-value">{{ total_balance|default:"0.00" }} €</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Nombre de comptes</div>
+    <div class="metric-value">{{ accounts_count|default:"0" }}</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Transactions ce mois</div>
+    <div class="metric-value">{{ monthly_transactions|default:"0" }}</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Dernière opération</div>
+    <div class="metric-value">{{ last_transaction_date|default:"Aucune" }}</div>
+  </div>
+  <div class="card">
+    <a class="btn" href="/accounts/">📊 Mes comptes</a>
+  </div>
+  <div class="card">
+    <a class="btn" href="/transactions/create/">➕ Nouvelle opération</a>
   </div>
 </div>
+
+<div class="grid2">
+  <div>
+    <h3>📈 Évolution de mon solde</h3>
+    <canvas id="balanceChart"></canvas>
+  </div>
+  <div>
+    <h3>💰 Répartition par type d'opération</h3>
+    <canvas id="typeChart"></canvas>
+  </div>
+  <div>
+    <h3>📅 Activité mensuelle</h3>
+    <canvas id="monthlyChart"></canvas>
+  </div>
+  <div>
+    <h3>🕐 Heures d'activité</h3>
+    <canvas id="hourChart"></canvas>
+  </div>
+  <div>
+    <h3>🎯 Objectif d'épargne</h3>
+    <div style="position:relative; width:100%; max-width:200px; margin:auto">
+      <canvas id="savingsGauge"></canvas>
+      <div class="gauge-center" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-weight:800;"></div>
+    </div>
+  </div>
+  <div>
+    <h3>📋 Dernières transactions</h3>
+    <div class="card" id="recentTransactions">
+      <div style="text-align: center; padding: 20px;">Chargement...</div>
+    </div>
+  </div>
+</div>
+
 <script>
 import('/static/js/dashboard.js').then(m=>m.renderClientCharts && m.renderClientCharts())
 </script>

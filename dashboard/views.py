@@ -45,10 +45,39 @@ def dashboard_admin(request):
 
 @login_required
 def dashboard_client(request):
-    # Données simples pour la démo
-    return render(request, 'dashboard/client.html', {
-        'total_balance': 0,
-    })
+    """Dashboard client avec données personnalisées"""
+    from transactions.models import Transaction
+    from accounts.models import Account
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    # Récupérer les comptes du client
+    user_accounts = Account.objects.filter(customer__user=request.user)
+    
+    # Calculer le solde total
+    total_balance = sum(account.balance or 0 for account in user_accounts)
+    
+    # Statistiques du mois
+    current_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    monthly_transactions = Transaction.objects.filter(
+        account__in=user_accounts,
+        created_at__gte=current_month
+    ).count()
+    
+    # Dernière transaction
+    last_transaction = Transaction.objects.filter(
+        account__in=user_accounts
+    ).order_by('-created_at').first()
+    
+    last_transaction_date = last_transaction.created_at.strftime('%d/%m/%Y %H:%M') if last_transaction else "Aucune"
+    
+    context = {
+        'total_balance': f"{total_balance:.2f}",
+        'accounts_count': user_accounts.count(),
+        'monthly_transactions': monthly_transactions,
+        'last_transaction_date': last_transaction_date,
+    }
+    return render(request, 'dashboard/client.html', context)
 
 
 @login_required
