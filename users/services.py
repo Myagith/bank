@@ -44,15 +44,21 @@ def send_welcome_email(user: User, raw_password: str) -> None:
 def get_user_accounts(user: User):
     """
     Retourne les comptes appartenant logiquement à l'utilisateur connecté.
-    Mapping heuristique (pas de FK directe User->Customer dans le schéma) :
+    Priorité:
+      0) s'il existe Customer.user = user, l'utiliser
       1) email exact entre User et Customer
-      2) sinon, username correspond au nom du client (name) ou au client_no
+      2) username correspond à Customer.name ou client_no
     """
     from customers.models import Customer
     from accounts.models import Account
 
     if not getattr(user, 'is_authenticated', False):
         return Account.objects.none()
+
+    # 0) Lien direct FK si présent
+    direct = Customer.objects.filter(user=user)
+    if direct.exists():
+        return Account.objects.filter(customer__in=direct)
 
     candidates = Customer.objects.none()
 
