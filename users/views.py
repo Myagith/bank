@@ -79,9 +79,19 @@ def otp_verify(request):
             user.otp_code = None
             user.otp_expires_at = None
             user.save(update_fields=['otp_code', 'otp_expires_at'])
-            if user.role == User.Role.ADMIN:
+            
+            # Debug: afficher le rôle de l'utilisateur
+            print(f"DEBUG: User {user.username} has role: {user.role}")
+            print(f"DEBUG: User is_superuser: {user.is_superuser}")
+            print(f"DEBUG: User is_admin property: {user.is_admin}")
+            
+            # Redirection basée sur le rôle ou superuser
+            if user.role == User.Role.ADMIN or user.is_superuser:
+                print(f"DEBUG: Redirecting to admin dashboard")
                 return redirect('dashboard:admin')
-            return redirect('dashboard:client')
+            else:
+                print(f"DEBUG: Redirecting to client dashboard")
+                return redirect('dashboard:client')
     else:
         form = OTPVerifyForm()
     return _render(request, 'users/otp_verify.html', {'form': form})
