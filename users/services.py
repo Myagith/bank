@@ -28,7 +28,7 @@ def send_otp_email(user: User) -> None:
         expires_minutes=10,
         app_name=app_name,
     )
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=settings.EMAIL_FAIL_SILENTLY)
 
 
 def send_welcome_email(user: User, raw_password: str) -> None:
@@ -38,7 +38,7 @@ def send_welcome_email(user: User, raw_password: str) -> None:
         'WELCOME_EMAIL_BODY',
         "Bonjour {username},\n\nVotre compte a été créé.\nIdentifiant: {username}\nMot de passe initial: {password}\n\nMerci d'utiliser {app_name}.")
     message = template.format(username=user.username, password=raw_password, app_name=app_name)
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=settings.EMAIL_FAIL_SILENTLY)
 
 
 def get_user_accounts(user: User):

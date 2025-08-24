@@ -105,7 +105,7 @@ L'équipe {app_name}
             message=message,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[recipient_email],
-            fail_silently=True
+            fail_silently=settings.EMAIL_FAIL_SILENTLY
         )
         
     except Exception as e:
