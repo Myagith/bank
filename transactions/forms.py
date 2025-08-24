@@ -38,5 +38,15 @@ class TransactionForm(forms.ModelForm):
             
             if destination_account == account:
                 raise forms.ValidationError("Vous ne pouvez pas transférer vers le même compte.")
+
+        # Si l'utilisateur n'est pas admin, il ne peut utiliser que ses comptes
+        request = getattr(self, 'request', None)
+        if request and request.user.is_authenticated and getattr(request.user, 'role', 'CLIENT') != 'ADMIN':
+            from users.services import get_user_accounts
+            user_accounts = get_user_accounts(request.user)
+            if account and account not in user_accounts:
+                raise forms.ValidationError("Vous ne pouvez pas utiliser ce compte.")
+            if destination_account and destination_account not in user_accounts:
+                raise forms.ValidationError("Vous ne pouvez pas transférer vers ce compte.")
         
         return cleaned_data
