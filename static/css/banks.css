@@ -1,0 +1,172 @@
+/* Styles pour la gestion des banques */
+
+/* Grille des banques */
+.banks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.bank-card {
+  background: white;
+  border: 2px solid #ecf0f1;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.bank-card:hover {
+  border-color: #3498db;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.bank-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.bank-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.bank-location {
+  display: flex;
+  gap: 10px;
+}
+
+.location-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7f8c8d;
+  background: #f8f9fa;
+  padding: 4px 12px;
+  border-radius: 15px;
+}
+
+/* Informations de la banque */
+.bank-info {
+  margin-bottom: 20px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f8f9fa;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+.info-value {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.info-value.balance {
+  font-weight: 700;
+  color: #27ae60;
+  font-size: 16px;
+}
+
+.customer-count-badge, .account-count-badge {
+  background: #3498db;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Actions de la banque */
+.bank-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-info {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #212529;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-sm:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Section des banques */
+.banks-section {
+  background: white;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .banks-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .bank-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    gap: 5px;
+    text-align: center;
+  }
+  
+  .bank-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .bank-card {
+    padding: 15px;
+  }
+  
+  .btn-sm {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
