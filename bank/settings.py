@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'core',
     'users',
     'banks',
-    'customers',
+    'customers.apps.CustomersConfig',
     'accounts',
     'transactions.apps.TransactionsConfig',
     'dashboard',
