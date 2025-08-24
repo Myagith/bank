@@ -150,7 +150,6 @@ def post_transaction(tx: Transaction) -> None:
             dest_account.save(update_fields=['balance'])
             
             # Créer une transaction de réception pour le destinataire
-            from .models import Transaction
             receiving_tx = Transaction.objects.create(
                 account=dest_account,
                 type=Transaction.Type.DEPOSIT,  # Pour le destinataire, c'est un dépôt
