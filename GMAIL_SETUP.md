@@ -51,6 +51,11 @@ EMAIL_HOST_PASSWORD=abcd efgh ijkl mnop
 EMAIL_USE_TLS=1
 EMAIL_USE_SSL=0
 DEFAULT_FROM_EMAIL=monemail@gmail.com
+# Activer emails d'accueil auto via Admin
+EMAIL_SEND_WELCOME_ON_ADMIN_CREATE=1
+EMAIL_SEND_WELCOME_ON_ADMIN_CREATE_CUSTOMER=1
+# Remonter les erreurs d'envoi
+EMAIL_FAIL_SILENTLY=0
 ```
 
 ---
@@ -75,22 +80,22 @@ python3 test_email.py
 
 ### **1. Email de bienvenue (création d'utilisateur)**
 ```
-PAYGUARD - Vos identifiants de connexion
+Cher(e) Client(e),
 
-Bonjour {username},
+Nous avons le plaisir de vous informer que votre compte {app_name} a été créé avec succès !
 
-Votre compte PAYGUARD a été créé avec succès.
+Si vous ne disposez pas encore de l'application {app_name}, nous vous invitons à la télécharger depuis Playstore ou Apple Store.
 
-🔐 Vos identifiants de connexion :
-• Identifiant : {username}
-• Mot de passe initial : {password}
+Lors de votre 1ère connexion, par mesures de sécurité et de confidentialité, vous devrez créer votre mot de passe en vous connectant à la rubrique « Créer un compte ».
 
-⚠️ IMPORTANT : Changez votre mot de passe lors de votre première connexion.
+Veuillez trouver ci-après votre contact téléphonique à saisir comme identifiant afin d'activer l'application : {identifier}
+
+Pour une sécurité renforcée, votre mot de passe doit comporter au moins 8 caractères composés de lettres majuscules, minuscules, de chiffres et de symboles (ex: # @ ...).
 
 🌐 Accédez à votre espace : http://localhost:8000/users/login/
 
 Cordialement,
-L'équipe PAYGUARD
+L'équipe {app_name}
 ```
 
 ### **2. Email OTP (connexion)**

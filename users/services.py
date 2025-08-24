@@ -6,6 +6,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db.models import Q
 from .models import User
+from typing import Optional
 
 
 def generate_otp() -> str:
@@ -28,17 +29,41 @@ def send_otp_email(user: User) -> None:
         expires_minutes=10,
         app_name=app_name,
     )
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=settings.EMAIL_FAIL_SILENTLY)
 
 
-def send_welcome_email(user: User, raw_password: str) -> None:
+def _resolve_user_phone(user: User) -> Optional[str]:
+    # 1) Attribut direct éventuel (ex: injecté depuis admin client)
+    phone = getattr(user, 'phone', None)
+    if phone:
+        return phone
+    # 2) Recherche via Customer lié, si existant
+    try:
+        from customers.models import Customer
+        customer = Customer.objects.filter(user=user).first()
+        if customer and customer.phone:
+            return customer.phone
+    except Exception:
+        pass
+    return None
+
+
+def send_welcome_email(user: User, raw_password: str | None = None) -> None:
     app_name = os.getenv('BANK_NAME', 'BANK')
     subject = os.getenv('WELCOME_EMAIL_SUBJECT', f"Bienvenue sur {app_name}")
-    template = os.getenv(
-        'WELCOME_EMAIL_BODY',
-        "Bonjour {username},\n\nVotre compte a été créé.\nIdentifiant: {username}\nMot de passe initial: {password}\n\nMerci d'utiliser {app_name}.")
-    message = template.format(username=user.username, password=raw_password, app_name=app_name)
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=True)
+    phone = _resolve_user_phone(user)
+    identifier = phone or user.username
+    if raw_password:
+        template = os.getenv(
+            'WELCOME_EMAIL_BODY',
+            "Bonjour {username},\n\nVotre compte a été créé.\nIdentifiant: {username}\nMot de passe initial: {password}\n\nMerci d'utiliser {app_name}.")
+        message = template.format(username=user.username, password=raw_password, app_name=app_name, phone=phone or '', identifier=identifier)
+    else:
+        template = os.getenv(
+            'WELCOME_EMAIL_BODY_NO_PASSWORD',
+            "Bonjour {username},\n\nVotre compte a été créé.\nIdentifiant: {identifier}\n\nMerci d'utiliser {app_name}.")
+        message = template.format(username=user.username, app_name=app_name, phone=phone or '', identifier=identifier)
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=settings.EMAIL_FAIL_SILENTLY)
 
 
 def get_user_accounts(user: User):
