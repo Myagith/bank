@@ -4,12 +4,12 @@ from customers.models import Customer
 
 class Account(models.Model):
     class AccountType(models.TextChoices):
-        CHECKING = 'CHECKING', 'Checking'
-        SAVINGS = 'SAVINGS', 'Savings'
+        CHECKING = 'CHECKING', 'Compte Courant'
+        SAVINGS = 'SAVINGS', 'Compte Épargne'
 
     class Status(models.TextChoices):
-        OPEN = 'OPEN', 'Open'
-        CLOSED = 'CLOSED', 'Closed'
+        OPEN = 'OPEN', 'Ouvert'
+        CLOSED = 'CLOSED', 'Fermé'
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='accounts')
     number = models.CharField(max_length=24, unique=True)
@@ -21,6 +21,8 @@ class Account(models.Model):
 
     class Meta:
         ordering = ['-opened_at']
+        verbose_name = 'Compte'
+        verbose_name_plural = 'Comptes'
 
     def __str__(self) -> str:
         return f"{self.number} ({self.customer})"

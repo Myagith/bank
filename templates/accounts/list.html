@@ -1,34 +1,215 @@
 {% extends 'base.html' %}
-{% block title %}Comptes{% endblock %}
+{% block title %}Gestion des Comptes{% endblock %}
+
 {% block content %}
-<h2>Comptes</h2>
-<div class="card" style="margin-bottom:12px">
-  <form method="get" class="filters" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px; align-items:end">
-    <div><label>Banque</label><input type="text" name="customer__bank" value="{{ request.GET.customer__bank }}"></div>
-    <div><label>Statut</label><input type="text" name="status" value="{{ request.GET.status }}"></div>
-    <div><label>Type</label><input type="text" name="type" value="{{ request.GET.type }}"></div>
-    <div><button class="btn" type="submit">Filtrer</button></div>
+<div class="dashboard-header">
+  <h2>🏦 Gestion des Comptes</h2>
+  <a href="/accounts/create/" class="btn btn-primary">➕ Nouveau Compte</a>
+</div>
+
+<!-- Statistiques -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">📊</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ accounts.count }}</div>
+      <div class="stat-label">Total Comptes</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">✅</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ open_accounts_count }}</div>
+      <div class="stat-label">Comptes Ouverts</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">💰</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ total_balance|floatformat:2 }} €</div>
+      <div class="stat-label">Solde Total</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">👥</div>
+    <div class="stat-content">
+      <div class="stat-value">{{ unique_customers_count }}</div>
+      <div class="stat-label">Clients Uniques</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filtres -->
+<div class="filters-card">
+  <h3>🔍 Filtres</h3>
+  <form method="get" class="filters-form">
+    <div class="filters-grid">
+      <div class="filter-group">
+        <label for="bank">🏦 Banque</label>
+        <select name="customer__bank__name" id="bank" class="form-select">
+          <option value="">Toutes les banques</option>
+          {% for bank in banks %}
+            <option value="{{ bank.name }}" {% if request.GET.customer__bank__name == bank.name %}selected{% endif %}>
+              {{ bank.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="status">📋 Statut</label>
+        <select name="status" id="status" class="form-select">
+          <option value="">Tous les statuts</option>
+          <option value="OPEN" {% if request.GET.status == 'OPEN' %}selected{% endif %}>Ouvert</option>
+          <option value="CLOSED" {% if request.GET.status == 'CLOSED' %}selected{% endif %}>Fermé</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="type">💳 Type</label>
+        <select name="type" id="type" class="form-select">
+          <option value="">Tous les types</option>
+          <option value="CHECKING" {% if request.GET.type == 'CHECKING' %}selected{% endif %}>Compte Courant</option>
+          <option value="SAVINGS" {% if request.GET.type == 'SAVINGS' %}selected{% endif %}>Compte Épargne</option>
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="country">🌍 Pays</label>
+        <select name="customer__bank__country" id="country" class="form-select">
+          <option value="">Tous les pays</option>
+          {% for country in countries %}
+            <option value="{{ country }}" {% if request.GET.customer__bank__country == country %}selected{% endif %}>
+              {{ country }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="city">🏙️ Ville</label>
+        <select name="customer__bank__city" id="city" class="form-select">
+          <option value="">Toutes les villes</option>
+          {% for city in cities %}
+            <option value="{{ city }}" {% if request.GET.customer__bank__city == city %}selected{% endif %}>
+              {{ city }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div class="filter-group">
+        <label for="customer_count">👥 Nombre de Clients</label>
+        <select name="customer_count" id="customer_count" class="form-select">
+          <option value="">Tous</option>
+          <option value="1" {% if request.GET.customer_count == '1' %}selected{% endif %}>1 client</option>
+          <option value="2-5" {% if request.GET.customer_count == '2-5' %}selected{% endif %}>2-5 clients</option>
+          <option value="6-10" {% if request.GET.customer_count == '6-10' %}selected{% endif %}>6-10 clients</option>
+          <option value="10+" {% if request.GET.customer_count == '10+' %}selected{% endif %}>Plus de 10 clients</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="filters-actions">
+      <button type="submit" class="btn btn-primary">🔍 Filtrer</button>
+      <a href="/accounts/" class="btn btn-secondary">🔄 Réinitialiser</a>
+    </div>
   </form>
 </div>
 
-<div class="cards">
-  {% for a in accounts %}
-    <div class="card">
-      <div class="metric-label">Compte</div>
-      <div class="metric-value" style="font-size:20px">{{ a.number }}</div>
-      <div style="margin-top:8px; color:#667">{{ a.customer }}</div>
-      <div style="margin-top:8px">
-        <span class="badge">{{ a.type }}</span>
-        <span class="badge" style="background:#eef">{{ a.status }}</span>
+<!-- Liste des comptes -->
+<div class="accounts-section">
+  <div class="section-header">
+    <h3>📋 Liste des Comptes ({{ accounts.count }})</h3>
+    {% if request.GET %}
+      <span class="active-filters">
+        Filtres actifs: 
+        {% for key, value in request.GET.items %}
+          {% if value and key != 'page' %}
+            <span class="filter-tag">{{ key }}: {{ value }}</span>
+          {% endif %}
+        {% endfor %}
+      </span>
+    {% endif %}
+  </div>
+
+  <div class="accounts-grid">
+    {% for account in accounts %}
+      <div class="account-card">
+        <div class="account-header">
+          <div class="account-number">{{ account.number }}</div>
+          <div class="account-status">
+            {% if account.status == 'OPEN' %}
+              <span class="status-badge status-open">✅ Ouvert</span>
+            {% else %}
+              <span class="status-badge status-closed">❌ Fermé</span>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="account-info">
+          <div class="info-row">
+            <span class="info-label">👤 Client:</span>
+            <span class="info-value">{{ account.customer.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">🏦 Banque:</span>
+            <span class="info-value">{{ account.customer.bank.name }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">💳 Type:</span>
+            <span class="info-value">
+              {% if account.type == 'CHECKING' %}
+                <span class="type-badge type-checking">Compte Courant</span>
+              {% else %}
+                <span class="type-badge type-savings">Compte Épargne</span>
+              {% endif %}
+            </span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">💰 Solde:</span>
+            <span class="info-value balance">{{ account.balance|floatformat:2 }} €</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">📅 Ouvert le:</span>
+            <span class="info-value">{{ account.opened_at|date:"d/m/Y" }}</span>
+          </div>
+        </div>
+        
+        <div class="account-actions">
+          <a href="/accounts/{{ account.pk }}/" class="btn btn-sm btn-info">👁️ Détails</a>
+          <a href="/accounts/{{ account.pk }}/update/" class="btn btn-sm btn-warning">✏️ Modifier</a>
+          {% if account.status == 'OPEN' %}
+            <a href="/accounts/{{ account.pk }}/close/" class="btn btn-sm btn-danger" 
+               onclick="return confirm('Êtes-vous sûr de vouloir fermer ce compte ?')">🔒 Fermer</a>
+          {% endif %}
+        </div>
       </div>
-      <div style="margin-top:12px; font-weight:700">Solde: {{ a.balance }}</div>
-      <div style="margin-top:12px">
-        <a class="btn" href="/accounts/{{ a.pk }}/">Détails</a>
-        <a class="btn" href="/accounts/{{ a.pk }}/update/" style="background:#00b894">Modifier</a>
+    {% empty %}
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>Aucun compte trouvé</h3>
+        <p>{% if request.GET %}Aucun compte ne correspond à vos critères de recherche.{% else %}Aucun compte n'a encore été créé.{% endif %}</p>
+        <a href="/accounts/create/" class="btn btn-primary">➕ Créer le premier compte</a>
       </div>
-    </div>
-  {% empty %}
-    <div class="card">Aucun compte</div>
-  {% endfor %}
+    {% endfor %}
+  </div>
 </div>
+
+<!-- Pagination -->
+{% if accounts.has_other_pages %}
+  <div class="pagination">
+    {% if accounts.has_previous %}
+      <a href="?page={{ accounts.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-sm">← Précédent</a>
+    {% endif %}
+    
+    <span class="page-info">
+      Page {{ accounts.number }} sur {{ accounts.paginator.num_pages }}
+    </span>
+    
+    {% if accounts.has_next %}
+      <a href="?page={{ accounts.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" class="btn btn-sm">Suivant →</a>
+    {% endif %}
+  </div>
+{% endif %}
 {% endblock %}

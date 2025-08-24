@@ -1,9 +1,195 @@
 {% extends 'base.html' %}
-{% block title %}Compte{% endblock %}
+{% block title %}{% if form.instance.pk %}Modifier le Compte{% else %}Nouveau Compte{% endif %}{% endblock %}
+
 {% block content %}
-<h2>Compte</h2>
-<form method="post" class="card">{% csrf_token %}
-  {{ form.as_p }}
-  <button class="btn" type="submit">Enregistrer</button>
-</form>
+<div class="form-container">
+  <div class="form-header">
+    <h2>{% if form.instance.pk %}✏️ Modifier le Compte{% else %}➕ Nouveau Compte{% endif %}</h2>
+    <a href="/accounts/" class="btn btn-secondary">← Retour aux comptes</a>
+  </div>
+
+  <div class="form-card">
+    <form method="post" class="account-form">
+      {% csrf_token %}
+      
+      <!-- Informations du client -->
+      <div class="form-section">
+        <h3>👤 Informations du Client</h3>
+        <div class="form-group">
+          <label for="{{ form.customer.id_for_label }}">{{ form.customer.label }}</label>
+          {{ form.customer }}
+          {% if form.customer.help_text %}
+            <small class="help-text">{{ form.customer.help_text }}</small>
+          {% endif %}
+          {% if form.customer.errors %}
+            <div class="error-message">{{ form.customer.errors.0 }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Informations du compte -->
+      <div class="form-section">
+        <h3>💳 Informations du Compte</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.number.id_for_label }}">{{ form.number.label }}</label>
+            {{ form.number }}
+            {% if form.number.help_text %}
+              <small class="help-text">{{ form.number.help_text }}</small>
+            {% endif %}
+            {% if form.number.errors %}
+              <div class="error-message">{{ form.number.errors.0 }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.balance.id_for_label }}">{{ form.balance.label }}</label>
+            {{ form.balance }}
+            {% if form.balance.help_text %}
+              <small class="help-text">{{ form.balance.help_text }}</small>
+            {% endif %}
+            {% if form.balance.errors %}
+              <div class="error-message">{{ form.balance.errors.0 }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="{{ form.type.id_for_label }}">{{ form.type.label }}</label>
+            {{ form.type }}
+            {% if form.type.errors %}
+              <div class="error-message">{{ form.type.errors.0 }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="form-group">
+            <label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+            {{ form.status }}
+            {% if form.status.errors %}
+              <div class="error-message">{{ form.status.errors.0 }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">
+          {% if form.instance.pk %}💾 Mettre à jour{% else %}✅ Créer le compte{% endif %}
+        </button>
+        <a href="/accounts/" class="btn btn-secondary">❌ Annuler</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e1e8ed;
+}
+
+.form-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.form-section {
+  margin-bottom: 30px;
+}
+
+.form-section h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #34495e;
+}
+
+.form-select, .form-control {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e1e8ed;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.form-select:focus, .form-control:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.help-text {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  color: #7f8c8d;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-size: 14px;
+  margin-top: 5px;
+  padding: 8px 12px;
+  background: #fdf2f2;
+  border-radius: 6px;
+  border-left: 4px solid #e74c3c;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: flex-end;
+  padding-top: 30px;
+  border-top: 1px solid #ecf0f1;
+}
+
+@media (max-width: 768px) {
+  .form-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
+</style>
 {% endblock %}
