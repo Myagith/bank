@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% block title %}Mes Comptes{% endblock %}
+{% block content %}
+<h1>Mes Comptes</h1>
+<p>Vue d'ensemble de vos comptes bancaires.</p>
+
+<div class="cards">
+  <div class="card">
+    <div class="metric-label">Nombre de comptes</div>
+    <div class="metric-value">{{ accounts.count }}</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Solde total</div>
+    <div class="metric-value">{{ total_balance|default:"0.00" }} €</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Comptes ouverts</div>
+    <div class="metric-value">{{ open_accounts|default:"0" }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Liste de mes comptes</h3>
+  {% if accounts %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Numéro de compte</th>
+          <th>Type</th>
+          <th>Banque</th>
+          <th>Solde</th>
+          <th>Statut</th>
+          <th>Date de création</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account in accounts %}
+        <tr>
+          <td>
+            <strong>{{ account.number }}</strong>
+          </td>
+          <td>
+            <span class="badge badge-{{ account.type|lower }}">
+              {{ account.get_type_display }}
+            </span>
+          </td>
+          <td>{{ account.customer.bank.name }}</td>
+          <td>
+            <span class="amount {% if account.balance < 0 %}negative{% endif %}">
+              {{ account.balance|default:"0.00" }} €
+            </span>
+          </td>
+          <td>
+            <span class="badge badge-{{ account.status|lower }}">
+              {{ account.get_status_display }}
+            </span>
+          </td>
+          <td>{{ account.created_at|date:"d/m/Y" }}</td>
+          <td>
+            <div class="actions">
+              <a href="{% url 'accounts:detail' account.pk %}" class="btn btn-small" title="Voir détails">
+                👁️
+              </a>
+              <a href="{% url 'transactions:create' %}?account={{ account.pk }}" class="btn btn-small" title="Nouvelle transaction">
+                💰
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="empty-state">
+      <p>Aucun compte trouvé.</p>
+      <p>Contactez votre banque pour ouvrir un compte.</p>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-checking {
+  background: #4CAF50;
+  color: white;
+}
+
+.badge-savings {
+  background: #2196F3;
+  color: white;
+}
+
+.badge-business {
+  background: #FF9800;
+  color: white;
+}
+
+.badge-open {
+  background: #4CAF50;
+  color: white;
+}
+
+.badge-closed {
+  background: #F44336;
+  color: white;
+}
+
+.amount {
+  font-weight: 600;
+}
+
+.amount.negative {
+  color: #F44336;
+}
+
+.actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 0.9em;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+</style>
+{% endblock %}

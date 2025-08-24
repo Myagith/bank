@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% block title %}Mes Opérations{% endblock %}
+{% block content %}
+<h1>Mes Opérations</h1>
+<p>Historique de toutes vos transactions bancaires.</p>
+
+<div class="cards">
+  <div class="card">
+    <div class="metric-label">Total transactions</div>
+    <div class="metric-value">{{ transactions.count }}</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Ce mois</div>
+    <div class="metric-value">{{ monthly_count|default:"0" }}</div>
+  </div>
+  <div class="card">
+    <div class="metric-label">Solde total</div>
+    <div class="metric-value">{{ total_balance|default:"0.00" }} €</div>
+  </div>
+  <div class="card">
+    <a href="{% url 'transactions:create' %}" class="btn">➕ Nouvelle transaction</a>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Historique des transactions</h3>
+  
+  <!-- Filtres -->
+  <form method="get" class="filters">
+    <div class="filter-row">
+      <label>Type :</label>
+      <select name="type">
+        <option value="">Tous</option>
+        <option value="DEPOSIT" {% if request.GET.type == 'DEPOSIT' %}selected{% endif %}>Dépôt</option>
+        <option value="WITHDRAW" {% if request.GET.type == 'WITHDRAW' %}selected{% endif %}>Retrait</option>
+        <option value="TRANSFER" {% if request.GET.type == 'TRANSFER' %}selected{% endif %}>Transfert</option>
+      </select>
+      
+      <label>Montant min :</label>
+      <input type="number" name="amount__gte" value="{{ request.GET.amount__gte }}" placeholder="0">
+      
+      <label>Montant max :</label>
+      <input type="number" name="amount__lte" value="{{ request.GET.amount__lte }}" placeholder="10000">
+      
+      <button type="submit" class="btn">🔍 Filtrer</button>
+    </div>
+  </form>
+  
+  {% if transactions %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Compte</th>
+          <th>Montant</th>
+          <th>Référence</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transaction in transactions %}
+        <tr>
+          <td>{{ transaction.created_at|date:"d/m/Y H:i" }}</td>
+          <td>
+            <span class="badge badge-{{ transaction.type|lower }}">
+              {{ transaction.get_type_display }}
+            </span>
+          </td>
+          <td>{{ transaction.account.number }}</td>
+          <td>
+            <span class="amount {% if transaction.type == 'WITHDRAW' %}negative{% endif %}">
+              {% if transaction.type == 'WITHDRAW' %}-{% else %}+{% endif %}{{ transaction.amount }} €
+            </span>
+          </td>
+          <td>{{ transaction.reference }}</td>
+          <td>{{ transaction.description|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page=1" class="btn">« Première</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn">‹ Précédente</a>
+      {% endif %}
+      
+      <span class="current">
+        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+      </span>
+      
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn">Suivante ›</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn">Dernière »</a>
+      {% endif %}
+    </div>
+    {% endif %}
+    
+  {% else %}
+    <div class="empty-state">
+      <p>Aucune transaction trouvée.</p>
+      <p>Commencez par effectuer votre première opération !</p>
+      <a href="{% url 'transactions:create' %}" class="btn">➕ Nouvelle transaction</a>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-deposit {
+  background: #4CAF50;
+  color: white;
+}
+
+.badge-withdraw {
+  background: #F44336;
+  color: white;
+}
+
+.badge-transfer {
+  background: #2196F3;
+  color: white;
+}
+
+.amount {
+  font-weight: 600;
+}
+
+.amount.negative {
+  color: #F44336;
+}
+
+.filters {
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-row label {
+  font-weight: 600;
+  margin-right: 5px;
+}
+
+.filter-row input,
+.filter-row select {
+  padding: 5px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.current {
+  padding: 8px 12px;
+  background: #e9ecef;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.empty-state .btn {
+  margin-top: 15px;
+}
+</style>
+{% endblock %}

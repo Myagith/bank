@@ -5,6 +5,7 @@ app_name = 'accounts'
 
 urlpatterns = [
     path('', views.AccountListView.as_view(), name='list'),
+    path('client/', views.ClientAccountListView.as_view(), name='client_list'),
     path('create/', views.AccountCreateView.as_view(), name='create'),
     path('<int:pk>/update/', views.AccountUpdateView.as_view(), name='update'),
     path('<int:pk>/', views.AccountDetailView.as_view(), name='detail'),
