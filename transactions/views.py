@@ -17,7 +17,18 @@ class TransactionCreateView(LoginRequiredMixin, CreateView):
     template_name = 'transactions/create.html'
     success_url = reverse_lazy('transactions:history')
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        # Restreindre les comptes accessibles selon l'utilisateur
+        if self.request.user.is_authenticated and self.request.user.role != 'ADMIN':
+            user_accounts = get_user_accounts(self.request.user)
+            form.fields['account'].queryset = user_accounts
+            form.fields['destination_account'].queryset = user_accounts.model.objects.filter(status='OPEN').exclude(pk__in=user_accounts.values('pk'))
+        return form
+
     def form_valid(self, form):
+        # Injecter la request dans le form pour validation côté form
+        form.request = self.request
         response = super().form_valid(form)
         try:
             post_transaction(self.object)

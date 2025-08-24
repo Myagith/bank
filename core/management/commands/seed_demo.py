@@ -49,6 +49,7 @@ class Command(BaseCommand):
 
         # Customers, Accounts and Transactions
         customer_field_names = {f.name for f in Customer._meta.get_fields()}
+        all_accounts = []
         for i in range(1, 31):
             bank = random.choice(banks)
             cust_defaults = {
@@ -80,6 +81,47 @@ class Command(BaseCommand):
                     elif ttype == 'WITHDRAW' and acc.balance > amount:
                         acc.balance -= amount
                 acc.save()
+                all_accounts.append(acc)
 
-        self.stdout.write(self.style.SUCCESS('Seed terminé. Utilisateur admin/Admin123!'))
+        # Booster les soldes: mettre des montants élevés positifs
+        for acc in all_accounts:
+            # entre 500 000 et 2 000 000 (2 décimales)
+            base = random.randint(500000, 2000000)
+            acc.balance = Decimal(base)
+            acc.save(update_fields=['balance'])
+
+        # Forcer 3 comptes négatifs s'il y a assez de comptes
+        if len(all_accounts) >= 3:
+            negative_samples = random.sample(all_accounts, 3)
+            for acc in negative_samples:
+                acc.balance = Decimal(-random.randint(1000, 50000))
+                acc.save(update_fields=['balance'])
+
+        # Ajouter un client VIP avec un gros montant
+        vip_bank = random.choice(banks)
+        vip_customer, _ = Customer.objects.get_or_create(
+            client_no='VIP00001', bank=vip_bank,
+            defaults={'name': 'VIP Client', 'email': 'vip@demo.ci', 'phone': '+2250700000000'}
+        )
+        # Créer (ou lier) un utilisateur VIP pour connexion
+        vip_user, created_user = User.objects.get_or_create(
+            username='vip',
+            defaults={'email': 'vip@demo.ci', 'role': 'CLIENT', 'can_login': True}
+        )
+        if created_user:
+            vip_user.set_password('Vip12345!')
+            vip_user.save()
+        if not vip_customer.user:
+            vip_customer.user = vip_user
+            vip_customer.save(update_fields=['user'])
+
+        vip_account, _ = Account.objects.get_or_create(
+            customer=vip_customer,
+            number=f'CI{vip_bank.id}VIP00001',
+            defaults={'type': 'CHECKING', 'balance': Decimal('0.00')}
+        )
+        vip_account.balance = Decimal('5000000.00')  # 5 000 000 pour tests de transferts
+        vip_account.save(update_fields=['balance'])
+
+        self.stdout.write(self.style.SUCCESS('Seed terminé. Utilisateur admin/Admin123! — VIP: vip/Vip12345!'))
 
