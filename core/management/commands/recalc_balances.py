@@ -10,17 +10,18 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         updated = 0
         for account in Account.objects.all():
-            deposits = Transaction.objects.filter(
-                Q(type=Transaction.Type.DEPOSIT, account=account) |
+            # Selon la demande: DEPOT diminue le solde du compte source
+            incoming = Transaction.objects.filter(
                 Q(type=Transaction.Type.TRANSFER, destination_account=account)
             ).aggregate(total=Sum('amount'))['total'] or 0
 
-            withdrawals = Transaction.objects.filter(
+            outgoing = Transaction.objects.filter(
+                Q(type=Transaction.Type.DEPOSIT, account=account) |
                 Q(type=Transaction.Type.WITHDRAW, account=account) |
                 Q(type=Transaction.Type.TRANSFER, account=account)
             ).aggregate(total=Sum('amount'))['total'] or 0
 
-            new_balance = deposits - withdrawals
+            new_balance = incoming - outgoing
             if account.balance != new_balance:
                 account.balance = new_balance
                 account.save(update_fields=['balance'])

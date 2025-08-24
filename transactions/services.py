@@ -118,7 +118,8 @@ def post_transaction(tx: Transaction) -> None:
     
     # Traitement de la transaction
     if tx.type == Transaction.Type.DEPOSIT:
-        account.balance = (account.balance or Decimal('0')) + tx.amount
+        # DEMANDE: un dépôt DIMINUE le solde
+        account.balance = (account.balance or Decimal('0')) - tx.amount
         # Email de confirmation de dépôt
         if account.customer.email:
             send_transaction_email(tx, account.customer.email, 'deposit_confirmation')
