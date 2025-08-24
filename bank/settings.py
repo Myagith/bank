@@ -90,8 +90,14 @@ WSGI_APPLICATION = 'bank.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql'
+        if os.getenv('POSTGRES_DB') and os.getenv('POSTGRES_USER') and os.getenv('POSTGRES_PASSWORD')
+        else 'django.db.backends.sqlite3',
+        'NAME': os.getenv('POSTGRES_DB', BASE_DIR / 'db.sqlite3'),
+        'USER': os.getenv('POSTGRES_USER', ''),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+        'HOST': os.getenv('POSTGRES_HOST', ''),
+        'PORT': os.getenv('POSTGRES_PORT', ''),
     }
 }
 
@@ -145,7 +151,7 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', '0') or 0)
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', '1') == '1'
-EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', '0') == '0'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', '0') == '1'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@bank.local')
 
 # Default primary key field type
