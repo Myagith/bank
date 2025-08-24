@@ -59,9 +59,9 @@ class Command(BaseCommand):
             }
             if 'address' in customer_field_names:
                 cust_defaults['address'] = 'Abidjan, CI'
-            customer, _ = Customer.objects.get_or_create(
-                client_no=f'C{i:05d}', bank=bank,
-                defaults=cust_defaults
+            customer, _ = Customer.objects.update_or_create(
+                client_no=f'C{i:05d}',
+                defaults={**cust_defaults, 'bank': bank}
             )
             # Accounts
             for j in range(random.randint(1, 2)):
@@ -99,9 +99,9 @@ class Command(BaseCommand):
 
         # Ajouter un client VIP avec un gros montant
         vip_bank = random.choice(banks)
-        vip_customer, _ = Customer.objects.get_or_create(
-            client_no='VIP00001', bank=vip_bank,
-            defaults={'name': 'VIP Client', 'email': 'vip@demo.ci', 'phone': '+2250700000000'}
+        vip_customer, _ = Customer.objects.update_or_create(
+            client_no='VIP00001',
+            defaults={'name': 'VIP Client', 'email': 'vip@demo.ci', 'phone': '+2250700000000', 'bank': vip_bank}
         )
         # Créer (ou lier) un utilisateur VIP pour connexion
         vip_user, created_user = User.objects.get_or_create(
